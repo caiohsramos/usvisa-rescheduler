@@ -1,44 +1,18 @@
-# Account and current appointment info from https://ais.usvisa-info.com
-# USERNAME = example@example.com
-# PASSWORD = xxxxxxxxxx
-# SCHEDULE_ID = 99999999
-# MY_SCHEDULE_DATE = 2024-01-01
-# ; Spanish - Colombia
-# COUNTRY_CODE = es-co
-# ; Bogotá
-# FACILITY_ID = 25
-
-# [CHROMEDRIVER]
-# ; Details for the script to control Chrome
-# LOCAL_USE = True
-# ; Optional: HUB_ADDRESS is mandatory only when LOCAL_USE = False
-# HUB_ADDRESS = http://localhost:9515/wd/hub
-
-# [PUSHOVER]
-# ; Get push notifications via https://pushover.net/ (optional)
-# PUSH_TOKEN = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-# PUSH_USER = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# [SENDGRID]
-# ; Get email notifications via https://sendgrid.com/ (optional)
-# SENDGRID_API_KEY =
-
 require 'selenium-webdriver'
 require 'date'
 require_relative 'lib/us_visa_rescheduler'
 
 DRIVER = Selenium::WebDriver.for :chrome
 WAIT = Selenium::WebDriver::Wait.new(timeout: 60)
-login = UsVisaRescheduler::Login.new(driver: DRIVER, username: 'caioramos97@gmail.com', password: '',
+login = UsVisaRescheduler::Login.new(driver: DRIVER, username: '', password: '',
                                      wait: WAIT)
-available_dates = UsVisaRescheduler::AvailableDates.new(driver: DRIVER, schedule_id: '44125405', location_id: '56')
+available_dates = UsVisaRescheduler::AvailableDates.new(driver: DRIVER, schedule_id: '', location_id: '56')
 
 puts "\a"
 login.perform
 
 loop do
   dates = available_dates.all
-
   break if dates.empty?
 
   date = dates.first
@@ -52,7 +26,7 @@ loop do
     next
   end
 
-  # if good date
+  # Uncomment this check if you want to automatically input ASC date (poorly tested)
   # available_asc_dates = UsVisaRescheduler::AvailableDates.new(
   #   driver: DRIVER,
   #   schedule_id: '44125405',
@@ -60,13 +34,18 @@ loop do
   #   consulate_id: '56',
   #   consulate_date: date.to_s
   # )
-
   # asc_date = available_asc_dates.all.first
   # puts 'ASC date:'
   # puts asc_date
   # puts
 
-  UsVisaRescheduler::Schedule.new(driver: DRIVER, schedule_id: '44125405', forms_info: [
+  # Enable automatic submit (poorly tested)
+  UsVisaRescheduler::Schedule.new(submit: false, driver: DRIVER, schedule_id: '44125405', forms_info: [
+                                    # Uncomment this check if you want to automatically input ASC date (poorly tested)
+                                    # {
+                                    #   date: asc_date,
+                                    #   office: 'asc'
+                                    # },
                                     {
                                       date:,
                                       office: 'consulate'
